@@ -14,25 +14,23 @@ CREATE TABLE "product" (
   "slogan" varchar,
   "description" varchar,
   "category" varchar,
-  "default_price" varchar,
-  "related" varchar
+  "default_price" integer
 );
 
 CREATE TABLE "styles" (
   "style_id" serial PRIMARY KEY NOT NULL,
+  "product_id" integer,
   "name" varchar,
-  "original_price" varchar,
   "sale_price" varchar,
-  "default" boolean,
-  "skus" varchar,
-  "product_id" integer
+  "original_price" integer,
+  "default" integer
 );
 
 CREATE TABLE "photos" (
   "photo_id" serial PRIMARY KEY NOT NULL,
   "style_id" integer,
-  "thumbnail_url" varchar,
-  "url" varchar
+  "url" varchar,
+  "thumbnail_url" varchar
 );
 
 CREATE TABLE "features" (
@@ -42,8 +40,25 @@ CREATE TABLE "features" (
   "value" varchar
 );
 
+CREATE TABLE "skus" (
+  "skus_id" serial PRIMARY KEY NOT NULL,
+  "style_id" integer,
+  "size" varchar(5),
+  "quantity" varchar
+);
+
+CREATE TABLE "related" (
+  "id" serial PRIMARY KEY NOT NULL,
+  "product_id" integer NOT NULL,
+  "related_id" integer NOT NULL
+);
+
 ALTER TABLE "styles" ADD FOREIGN KEY ("product_id") REFERENCES "product" ("product_id");
 
 ALTER TABLE "photos" ADD FOREIGN KEY ("style_id") REFERENCES "styles" ("style_id");
 
 ALTER TABLE "features" ADD FOREIGN KEY ("feature_id") REFERENCES "product" ("product_id");
+
+ALTER TABLE "skus" ADD FOREIGN KEY ("style_id") REFERENCES "styles" ("style_id");
+
+ALTER TABLE "related" ADD FOREIGN KEY ("product_id") REFERENCES "product" ("product_id");
