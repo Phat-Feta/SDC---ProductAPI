@@ -9,6 +9,12 @@ const pool = new Pool({
   post: 5432
 });
 
-console.log(process.env.DB_NAME)
+pool.connect()
+  .then(() => {
+    console.log('Connected to database');
+  })
+  .catch((err) => {
+    console.log(err, 'Cannot connect to database');
+  });
 
-module.exports = { pool };
+module.exports = pool;
