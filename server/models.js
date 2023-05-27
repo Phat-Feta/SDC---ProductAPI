@@ -1,26 +1,46 @@
 const pool = require('../database/pgConnection.js');
 
-const getProductsFromDB = (id) => {
-
+const getProductsFromDB = (page, count) => {
+  const start = count * page - count + 1;
+  const end = page * count;
+  const queryStr = `SELECT product_id AS id, name, slogan, description, category, default_price FROM product WHERE product_id>=${start} AND product_id<=${end};`;
+  return pool.query(queryStr);
 };
 
 const getProductDetailsFromDB = (id) => {
   const productQueryStr = `SELECT name, slogan, description, category, default_price FROM product WHERE product_id=${id};`;
-  const featuresQueryStr = `SELECT feature, feature_value FROM features WHERE product_id=${id};`;
+  const featuresQueryStr = `SELECT feature, feature_value AS value FROM features WHERE product_id=${id};`;
   const productPromise = pool.query(productQueryStr);
   const featuresPromise = pool.query(featuresQueryStr);
   return Promise.all([productPromise, featuresPromise]);
 };
 
 const getStylesByIdFromDB = (id) => {
-  const stylesQueryStr = `SELECT * FROM styles WHERE product_id=${id};`;
+  const stylesQueryStr = `SELECT
+    s.*,
+    (
+      SELECT json_agg(
+        json_build_object(
+          'thumbnail_url', p.thumbnail_url,
+          'url', p.url
+        )
+      )
+      FROM photos p
+      WHERE p.style_id=s.style_id
+    ) AS photos,
+    json_object_agg(
+      skus.skus_id,
+      json_build_object(
+        'quantity', skus.quantity,
+        'size', skus.size
+      )
+    ) AS skus
+  FROM styles s
+    JOIN skus ON s.style_id=skus.style_id
+  WHERE s.product_id=${id}
+  GROUP BY s.style_id
+  ORDER BY s.style_id ASC;`;
   return pool.query(stylesQueryStr);
-    // .then((dbRes) => {
-    //   return dbRes.rows;
-    // })
-    // .catch((err) => {
-    //   console.log(err, 'Failed to get style_id');
-    // });
 };
 
 const getRelatedProFromDB = (id) => {

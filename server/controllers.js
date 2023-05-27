@@ -1,7 +1,18 @@
 const {getProductsFromDB, getProductDetailsFromDB, getStylesByIdFromDB, getRelatedProFromDB} = require('./models.js');
 
 const getProducts = (req, res) => {
-
+  const count = req.query.count ? req.query.count : 5;
+  const page = req.query.page ? req.query.page : 1;
+  getProductsFromDB(page, count)
+    .then((dbRes) => {
+      dbRes.rows.forEach((product) => {
+        product.campus = 'hr-rfp';
+      });
+      res.status(200).send(dbRes.rows);
+    })
+    .catch((err) => {
+      res.sendStatus(404);
+    });
 };
 
 const getProductById = (req, res) => {
@@ -10,6 +21,7 @@ const getProductById = (req, res) => {
       const productInfo = dbRes[0].rows[0];
       const featureInfo = dbRes[1].rows;
       const defaultPrice = productInfo['default_price'];
+      productInfo['campus'] = 'hr-rfp';
       productInfo['id'] = Number(req.query.product_id);
       productInfo['default_price'] = String(defaultPrice);
       productInfo['features'] = featureInfo;
@@ -21,30 +33,30 @@ const getProductById = (req, res) => {
 };
 
 const getStylesById = (req, res) => {
-  // console.log(req.query.product_id)
-  // getStylesByIdFromDB(req.query.product_id)
-  //   .then((dbRes) => {
-  //     // console.log(dbRes.rows);
-  //     let dataPromised = dbRes.rows.map((style) => {
-  //       // console.log(style);
-  //       // const photosQueryStr = `SELECT url, thumbnail_url FROM photos WHERE style_id=${style.style_id};`;
-  //       // const skusQueryStr = `SELECT size, quantity FROM skus WHERE style_id=${style.style_id};`;
-  //       const queryStr = `SELECT size, quantity, url, thumbnail_url FROM skus INNER JOIN photos on skus.style_id=photos.style_id WHERE photos.style_id=${style.style_id};`;
-  //       console.log(queryStr);
-  //       return pool.query(queryStr);
-  //       // const skusPromise = pool.query(skusQueryStr);
-  //     });
-  //     console.log(typeof dataPromised)
-  //     return Promise.all(dataPromised);
-  //   })
-  //   .then((dbRes) => {
-  //     console.log(dbRes);
-  //     res.status(200).send();
-
-  //   })
-  //   .catch((err) => {
-  //     res.sendStatus(404);
-  //   });
+  getStylesByIdFromDB(req.query.product_id)
+    .then((dbRes) => {
+      let result ={
+        product_id: String(req.query.product_id),
+        results: [],
+      }
+      dbRes.rows.forEach((style) => {
+        let updatedSale = style.sale_price === 'null' ? null : style.sale_price;
+        let updatedStyle = {
+          style_id: style.style_id,
+          name: style.name,
+          original_price: String(style.original_price),
+          sale_price: updatedSale,
+          'default?': style.isDefault === 1 ? true : false,
+          photos: style.photos,
+          skus: style.skus,
+        }
+        result.results.push(updatedStyle);
+      });
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.sendStatus(404);
+    });
 };
 
 const getRelatedPro = (req, res) => {
