@@ -13,19 +13,14 @@ const getProductDetailsFromDB = (id) => {
 };
 
 const getStylesByIdFromDB = (id) => {
-  const stylesQueryStr = `SELECT style_id, name, original_price, sale_price, isDefault FROM styles WHERE product_id=${id};`;
-  pool.query(stylesQueryStr)
-    .then(() => {
-
-    })
-    .catch((err) => {
-      console.log(err, 'Failed to get style_id');
-    });
-  const photosQueryStr = `SELECT url, thumbnail_url FROM photos WHERE style_id=${style_id};`;
-  const skusQueryStr = `SELECT size, quantity FROM skus WHERE style_id=${style_id};`;
-  const productPromise = pool.query(productQueryStr);
-  const featuresPromise = pool.query(featuresQueryStr);
-  return Promise.all([productPromise, featuresPromise]);
+  const stylesQueryStr = `SELECT * FROM styles WHERE product_id=${id};`;
+  return pool.query(stylesQueryStr);
+    // .then((dbRes) => {
+    //   return dbRes.rows;
+    // })
+    // .catch((err) => {
+    //   console.log(err, 'Failed to get style_id');
+    // });
 };
 
 const getRelatedProFromDB = (id) => {
