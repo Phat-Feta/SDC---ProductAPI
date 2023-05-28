@@ -16,12 +16,17 @@
     "postgres": "^3.3.4"
   },
   "scripts": {
-    "start": "nodemon ./server/index.js"
+    "start": "nodemon ./server/index.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
     "url": "SDC_productAPI"
   },
   "author": "Yan Luo",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
+  }
 }
