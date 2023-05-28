@@ -35,4 +35,13 @@ describe('GET "/products/:product_id"', () => {
     expect(res.statusCode).toEqual(200);
     expect(Object.keys(res._body.features[0])).toEqual(['feature', 'value']);
   });
+
+  test("should respond the correct product name, category, slogan and default_price", async () => {
+    const res = await request(app).get('/products/:product_id?product_id=2')
+    expect(res.statusCode).toEqual(200);
+    expect(res._body.name).toEqual('Bright Future Sunglasses');
+    expect(res._body.category).toEqual('Accessories');
+    expect(res._body.slogan).toEqual("You've got to wear shades");
+    expect(res._body.default_price).toEqual('69');
+  });
 });
